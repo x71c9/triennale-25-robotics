@@ -53,13 +53,8 @@ class TrienaleRobots:
         self.motors.begin_communication()
         self.motors.set_operating_mode("current-based position", ID = "all")
 
-
-        # TODO
-
-        # homeing... how to set it to 0
-
-
-
+        for robot_id in self.robots.keys():
+            self.set_position(robot_id, MIN_CABLE_LENGTH_IN_M)
 
     def clip(self, value, lower, upper):
         return lower if value < lower else upper if value > upper else value
@@ -70,12 +65,14 @@ class TrienaleRobots:
 
     def set_position(self, robot_id: str, length_in_meters: float):
         length_in_meters = self.clip(length_in_meters, MIN_CABLE_LENGTH_IN_M, self.robots[robot_id].max_cable_length_in_m)
-        length_in_units = self.meters_to_units(length_in_meters)
-        
-        motor_ids = self.robots[robot_id].motor_ids
-        self.motors.write_position(motor_ids, length_in_units)
 
-
-
-
+        if length_in_meters <= MIN_CABLE_LENGTH_IN_M:
+            #TODO:
+            # Do sth. when robot is supposed to go to minimum position
+            print("Reseting robot.")
+        else:
+            length_in_units = self.meters_to_units(length_in_meters)
+            
+            motor_ids = self.robots[robot_id].motor_ids
+            self.motors.write_position(motor_ids, length_in_units)
 
