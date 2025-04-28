@@ -22,11 +22,10 @@ ROBOT_D_MAX_CABLE_LENGTH_IN_M = 1.0
 MIN_CABLE_LENGTH_IN_M = 0.0
 
 MOTOR_STEPS_PER_TURN = 4096
-GEAR_RATIO = 10.0
-DRUM_DIAMETER_M = 0.34
+GEAR_RATIO = 234.0/30.0         # Big gear/small gear
+DRUM_DIAMETER_M = 0.35          # Diameter with half cable wound up
 CABLE_PER_DRUM_TURN = math.pi * DRUM_DIAMETER_M
 CABLE_PER_MOTOR_TURN = CABLE_PER_DRUM_TURN / GEAR_RATIO
-
 
 
 
@@ -42,6 +41,7 @@ robot_c = Robot(ROBOT_C_MOTOR_IDS, ROBOT_C_MAX_CABLE_LENGTH_IN_M)
 robot_d = Robot(ROBOT_D_MOTOR_IDS, ROBOT_D_MAX_CABLE_LENGTH_IN_M)
 
 
+
 class TrienaleRobots:
     def __init__(self):
         self.robots = {"A": robot_a, "B": robot_b, "C": robot_c, "D": robot_d}
@@ -51,10 +51,15 @@ class TrienaleRobots:
                             series_name=["xm", "xm"], baudrate=1000000, port_name=motors_ids)
 
         self.motors.begin_communication()
-        self.motors.set_operating_mode("extended position", ID = "all")
+        self.motors.set_operating_mode("current-based position", ID = "all")
 
 
         # TODO
+
+        # homeing... how to set it to 0
+
+
+
 
     def clip(self, value, lower, upper):
         return lower if value < lower else upper if value > upper else value
@@ -63,7 +68,7 @@ class TrienaleRobots:
         units = int(round(meters / CABLE_PER_MOTOR_TURN))
         return units
 
-    def goto(self, robot_id: str, length_in_meters: float):
+    def set_position(self, robot_id: str, length_in_meters: float):
         length_in_meters = self.clip(length_in_meters, MIN_CABLE_LENGTH_IN_M, self.robots[robot_id].max_cable_length_in_m)
         length_in_units = self.meters_to_units(length_in_meters)
         
