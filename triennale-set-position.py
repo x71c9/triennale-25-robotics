@@ -3,11 +3,11 @@
 import argparse
 import sys
 
-import trienale
+import triennale
 
 def run(robot_id, position, velocity):
     print(f"Setting robot {robot_id} to position {position} at velocity {velocity}")
-    # robot = trienale.TrienaleRobot(robot_id)
+    # robot = triennale.TriennaleRobot(robot_id)
     # robot.set_position(position, velocity)
 
 

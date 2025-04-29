@@ -1,12 +1,12 @@
 import time
 from utility import Key
 
-from trienale import TrienaleRobots
+from triennale import TriennaleRobots
 
 R_ID = "A"
 
 key = Key()
-tr = TrienaleRobots(robot_ids=[R_ID])
+tr = TriennaleRobots(robot_ids=[R_ID])
 
 input()
 tr.homeing(robot_id=R_ID)

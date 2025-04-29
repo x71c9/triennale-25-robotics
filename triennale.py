@@ -65,7 +65,7 @@ ROBOT_FILE_PATHS = { "A": ROBOT_A_FILE_PATH,
 
 
 
-class TrienaleRobot:
+class TriennaleRobot:
     def __init__(self, robot_id):
 
         self.motor_ids = ROBOT_IDS[robot_id]
@@ -73,7 +73,7 @@ class TrienaleRobot:
         self.current_limits = ROBOT_CURRENT_LIMITS[robot_id]
         self.file_path = ROBOT_FILE_PATHS[robot_id]
         
-        self.motors = Dynamixel(ID= self.motor_ids, descriptive_device_name="TrienaleRobot", 
+        self.motors = Dynamixel(ID= self.motor_ids, descriptive_device_name="TriennaleRobot", 
                                 series_name=["xm", "xm"], baudrate=BAUDRATE, port_name=U2D2_PORT)
 
         self.motors.begin_communication()
