@@ -9,7 +9,7 @@ import trienale
 def run(robot_id):
     print(f"Running for robot_id: {robot_id}")
     # robot = trienale.TrienaleRobot(robot_id)
-    # robot.homeing()
+    # robot.get_position()
 
 
 def main():
