@@ -29,7 +29,7 @@ ROBOT_A_CURRENT_LIMITS_IN_UNITS = [25, 25]
 ROBOT_A_FILE_PATH = "/home/max/robotA.txt"
 
 ROBOT_B_MOTOR_IDS = [13,2]
-ROBOT_B_MAX_CABLE_LENGTH_IN_M = 1.0
+ROBOT_B_MAX_CABLE_LENGTH_IN_M = 5.0
 # ROBOT_B_CURRENT_LIMITS_IN_UNITS = [200, 200]
 ROBOT_B_CURRENT_LIMITS_IN_UNITS = [120, 120]
 ROBOT_B_FILE_PATH = "/home/max/robotB.txt"
@@ -86,9 +86,9 @@ class TriennaleRobot:
         
         self.apply_current_limit_settings()
 
-        self.zero_position_in_units = self.read_zero_position_from_file()
+        self.zero_positions_in_units = self.read_zero_positions_from_file()
         if self.dbg:
-            print(f"Read zero position: {self.zero_position_in_units}")
+            print(f"Read zero positions: {self.zero_positions_in_units}")
 
 
     def apply_current_limit_settings(self):
@@ -117,7 +117,7 @@ class TriennaleRobot:
                     print("\n LIMIT reached")
                     self.reel_out_a_bit()
                     
-                    self.write_zero_position_to_file()
+                    self.write_zero_positions_to_file()
 
                     return
                     
@@ -158,52 +158,61 @@ class TriennaleRobot:
             self.motors.write_position(curr_pos, ID = id)
 
 
-    def read_average_motor_position_in_units(self):
-        positions_in_units = []
+    def read_motor_positions_in_units(self):
+        motor_positions = []
         for id in self.motor_ids:
-            positions_in_units.append(self.motors.read_position(id))
-        return int(sum(positions_in_units)/len(positions_in_units))
-
-
-
-
-    def write_zero_position_to_file(self):
-        motor_positions = self.read_average_motor_position_in_units()
-        try:
-            with open(self.file_path, 'w') as f:
-                f.write(str(motor_positions))
-        except IOError as e:
-            raise RuntimeError(f"Failed to write zero position to {self.file_path}: {e}")
+            motor_positions.append(self.motors.read_position(id))
         return motor_positions
 
 
-    def read_zero_position_from_file(self):
+
+
+    def write_zero_positions_to_file(self):
+        motor_positions = [self.motors.read_position(ID=id) for id in self.motor_ids]
+        try:
+            with open(self.file_path, 'w') as f:
+                f.write(','.join(str(p) for p in motor_positions))
+        except IOError as e:
+            raise RuntimeError(f"Failed writing zero positions to {self.file_path}: {e}")
+        return motor_positions
+
+    def read_zero_positions_from_file(self):
         try:
             with open(self.file_path, 'r') as f:
-                content = f.read().strip()
+                data = f.read().strip()
         except FileNotFoundError:
-            print(f"Zero position file not found: {self.file_path}")
-            zero_position_in_units = self.write_zero_position_to_file()
-            return zero_position_in_units
+            return self.write_zero_positions_to_file()
         except IOError as e:
-            raise RuntimeError(f"Failed to read zero position from {self.file_path}: {e}")
+            raise RuntimeError(f"Error reading zero positions from {self.file_path}: {e}")
 
+        parts = data.split(',')
+        if len(parts) != len(self.motor_ids):
+            return self.write_zero_positions_to_file()
         try:
-            zero_position_in_units = int(content)
+            return [int(p) for p in parts]
         except ValueError:
-            raise ValueError(f"Invalid zero position value in {self.file_path}: '{content}'")
-        return zero_position_in_units
+            return self.write_zero_positions_to_file()
+        
+        
 
 
 
     def set_position(self, length_in_meters: float, velocity:float):
+        self.write_velocity(velocity)
+
         length_in_meters = self.clip(length_in_meters, MIN_CABLE_LENGTH_IN_M, self.max_cable_length_in_m)
         length_in_units = self.meters_to_units(length_in_meters)
 
-        target_length_in_units = length_in_units + self.zero_position_in_units
-        
-        self.write_velocity(velocity)
-        self.motors.write_position(self.motor_ids, target_length_in_units)
+        if self.dbg:
+            print(f"Additional length in units: {length_in_units}")
+
+        target_positions = [zp + length_in_units for zp in self.zero_positions_in_units]
+
+        for id, position in zip(self.motor_ids, target_positions):
+            
+            self.motors.write_position(position, ID=id)
+            if self.dbg:
+                print(f"Setting motor {id} to length: {position}")
 
     def write_velocity(self, velocity:float):
         velocity_zero_to_one = self.clip(velocity, 0.0, 1.0)
@@ -223,15 +232,17 @@ class TriennaleRobot:
 
 
     def get_position(self):
-        average_motor_positions = self.read_average_motor_position_in_units()
+        motor_positions = [self.motors.read_position(ID=id) for id in self.motor_ids]                
+        deltas = [mp - zp for mp, zp in zip(motor_positions, self.zero_positions_in_units)]
         if self.dbg:
-            print(f"Average Motor position in units: {average_motor_positions}")     
+            print(f"Motor deltas in units: {deltas}")
+        meters = [self.units_to_meters(delta) for delta in deltas]
+
+        if self.dbg:
+            print(f"Meters: {meters}")
         
-        motor_position_in_units = average_motor_positions - self.zero_position_in_units
-        if self.dbg:
-            print(f"Motor position in units: {motor_position_in_units}")
-            
-        return self.units_to_meters(motor_position_in_units)
+        return sum(meters) / len(meters)
+
 
     def units_to_meters(self, units):
         return units / MOTOR_STEPS_PER_TURN * CABLE_PER_MOTOR_TURN
