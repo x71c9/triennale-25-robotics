@@ -138,7 +138,7 @@ class TriennaleRobot:
             target_position = current_position - 1000
             self.motors.write_position(target_position, ID=id)
 
-        time.sleep(2)
+        time.sleep(3)
         self.apply_homing_settings()
 
     def apply_homing_settings(self):
