@@ -39,35 +39,40 @@ ROBOT_D_MAX_CABLE_LENGTH_IN_M = 1.0
 ROBOT_D_CURRENT_LIMITS_IN_UNITS = [150, 150]
 
 
+ROBOT_IDS = { "A": ROBOT_A_MOTOR_IDS, 
+            "B": ROBOT_B_MOTOR_IDS, 
+            "C": ROBOT_C_MOTOR_IDS, 
+            "D": ROBOT_D_MOTOR_IDS}
 
-class TrienaleRobots:
+ROBOT_MAX_CABLE_LENGTHS_IN_M = {  "A": ROBOT_A_MAX_CABLE_LENGTH_IN_M, 
+                                "B": ROBOT_B_MAX_CABLE_LENGTH_IN_M, 
+                                "C": ROBOT_C_MAX_CABLE_LENGTH_IN_M, 
+                                "D": ROBOT_D_MAX_CABLE_LENGTH_IN_M}
+
+ROBOT_CURRENT_LIMITS = {  "A": ROBOT_A_CURRENT_LIMITS_IN_UNITS, 
+                        "B": ROBOT_B_CURRENT_LIMITS_IN_UNITS, 
+                        "C": ROBOT_C_CURRENT_LIMITS_IN_UNITS, 
+                        "D": ROBOT_D_CURRENT_LIMITS_IN_UNITS}
+
+
+
+class TrienaleRobot:
     def __init__(self, robot_id):
-        all_ids = { "A": ROBOT_A_MOTOR_IDS, 
-                    "B": ROBOT_B_MOTOR_IDS, 
-                    "C": ROBOT_C_MOTOR_IDS, 
-                    "D": ROBOT_D_MOTOR_IDS}
+
+        self.motor_ids = ROBOT_IDS[robot_id]
+        self.max_cable_length_in_m = ROBOT_MAX_CABLE_LENGTHS_IN_M[robot_id]
+        self.current_limits = ROBOT_CURRENT_LIMITS[robot_id]
         
-        all_max_cable_lengths_in_m = {  "A": ROBOT_A_MAX_CABLE_LENGTH_IN_M, 
-                                        "B": ROBOT_B_MAX_CABLE_LENGTH_IN_M, 
-                                        "C": ROBOT_C_MAX_CABLE_LENGTH_IN_M, 
-                                        "D": ROBOT_D_MAX_CABLE_LENGTH_IN_M}
-        
-        all_current_limits = {  "A": ROBOT_A_CURRENT_LIMITS_IN_UNITS, 
-                                "B": ROBOT_B_CURRENT_LIMITS_IN_UNITS, 
-                                "C": ROBOT_C_CURRENT_LIMITS_IN_UNITS, 
-                                "D": ROBOT_D_CURRENT_LIMITS_IN_UNITS}
-        
-        self.motor_ids = all_ids[robot_id]
-        self.max_cable_length_in_m = all_max_cable_lengths_in_m[robot_id]
-        self.current_limits = all_current_limits[robot_id]
-        
-        self.motors = Dynamixel(ID= self.motor_ids, descriptive_device_name="Trienale Robots", 
+        self.motors = Dynamixel(ID= self.motor_ids, descriptive_device_name="TrienaleRobot", 
                                 series_name=["xm", "xm"], baudrate=BAUDRATE, port_name=U2D2_PORT)
 
         self.motors.begin_communication()
         self.motors.set_operating_mode("current-based position", ID = "all")
         
         self.apply_current_limit_settings()
+
+
+
 
     def homeing(self):
         self.apply_homing_settings()
