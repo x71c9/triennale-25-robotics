@@ -39,47 +39,63 @@ CABLE_PER_MOTOR_TURN = CABLE_PER_DRUM_TURN / GEAR_RATIO
 
 SMALL_CURRENT_THRESHOLD_IN_UNITS = 5
 
-class Robot:
-    def __init__(self, motor_ids, max_cable_length_in_m, current_limits_in_units):
-        self.motor_ids = motor_ids
-        self.cable_length_in_m = None
-        self.max_cable_length_in_m = max_cable_length_in_m
-        self.current_limits_in_units = current_limits_in_units
+class TrienaleRobots:
+    def __init__(self, robot_id):
+        all_ids = { "A": ROBOT_A_MOTOR_IDS, 
+                    "B": ROBOT_B_MOTOR_IDS, 
+                    "C": ROBOT_C_MOTOR_IDS, 
+                    "D": ROBOT_D_MOTOR_IDS}
+        
+        all_max_cable_lengths_in_m = {  "A": ROBOT_A_MAX_CABLE_LENGTH_IN_M, 
+                                        "B": ROBOT_B_MAX_CABLE_LENGTH_IN_M, 
+                                        "C": ROBOT_C_MAX_CABLE_LENGTH_IN_M, 
+                                        "D": ROBOT_D_MAX_CABLE_LENGTH_IN_M}
+        
+        all_current_limits = {  "A": ROBOT_A_CURRENT_LIMITS_IN_UNITS, 
+                                "B": ROBOT_B_CURRENT_LIMITS_IN_UNITS, 
+                                "C": ROBOT_C_CURRENT_LIMITS_IN_UNITS, 
+                                "D": ROBOT_D_CURRENT_LIMITS_IN_UNITS}
+        
+        self.motor_ids = all_ids[robot_id]
+        self.max_cable_length_in_m = all_max_cable_lengths_in_m[robot_id]
+        self.current_limits = all_current_limits[robot_id]
+        
+        self.motors = Dynamixel(ID= self.motor_ids, descriptive_device_name="Trienale Robots", 
+                                series_name=["xm", "xm"], baudrate=BAUDRATE, port_name=U2D2_PORT)
 
-    def homeing(self, robot_id):
-        robot = self.robots[robot_id]
-        motor_ids = robot.motor_ids
+        self.motors.begin_communication()
+        self.motors.set_operating_mode("current-based position", ID = "all")
+        
+        self.apply_current_limit_settings()
 
-        self.apply_homing_settings(robot_id=robot_id)
-        self.move_motors_simple(robot_id = robot_id, reel_out=False)
+    def homeing(self):
+        self.apply_homing_settings()
+        self.move_motors_simple(reel_out=False)
 
         while 1:
             curr = []
-            for id in motor_ids:
+            for id in self.motor_ids:
                 current = self.motors.read_current(ID=id)
                 curr.append(current)
                 
-                limits = self.robots[robot_id].current_limits_in_units
+                limits = self.current_limits
                 if current > max(limits):
-                    self.toggle_torque(torque_on=False, robot_id=robot_id)
+                    self.toggle_torque(torque_on=False)
                     time.sleep(0.5)
-                    self.toggle_torque(torque_on=True, robot_id=robot_id)
+                    self.toggle_torque(torque_on=True)
 
-                    self.stop_motors(robot_id=robot_id)
-                    print("\n LIMIT reached on ID= ", id)
-                    self.reel_out_a_bit(robot_id=robot_id)
+                    self.stop_motors()
+                    print("\n LIMIT reached")
+                    self.reel_out_a_bit()
                     return
                     
             print(curr)
 
-    def toggle_torque(self, torque_on, robot_id):
-        robot = self.robots[robot_id]
-        motor_ids = robot.motor_ids
-
+    def toggle_torque(self, torque_on):
         if torque_on:
-            self.motors.enable_torque(ID=motor_ids)
+            self.motors.enable_torque(ID=self.motor_ids)
         else:
-            self.motors.disable_torque(ID=motor_ids)
+            self.motors.disable_torque(ID=self.motor_ids)
 
     def reel_out_a_bit(self, robot_id):
         robot = self.robots[robot_id]
@@ -94,59 +110,54 @@ class Robot:
         time.sleep(2)
         self.apply_homing_settings(robot_id=robot_id)
 
-
-    def apply_current_limit_settings(self, robot_id):
-        robot = self.robots[robot_id]
-        for lim, id in zip(robot.current_limits_in_units, robot.motor_ids):
+    def apply_current_limit_settings(self):
+        for lim, id in zip(self.current_limits, self.motor_ids):
             self.motors.write_current(lim, ID = id)
 
-    def apply_homing_settings(self, robot_id):
-        robot = self.robots[robot_id]
-        self.motors.write_profile_velocity(HOMING_SPEED, ID=robot.motor_ids)
+    def apply_homing_settings(self):
+        self.motors.write_profile_velocity(HOMING_SPEED, ID=self.motor_ids)
   
-    def move_motors_simple(self, robot_id, reel_out):
-        robot = self.robots[robot_id]
-        motor_ids = robot.motor_ids
-
+    def move_motors_simple(self, reel_out):
         if reel_out:
             demand = -900000
         else:
             demand = 900000
 
-        self.motors.write_position(demand, ID = motor_ids)
+        self.motors.write_position(demand, ID = self.motor_ids)
     
-    def stop_motors(self, robot_id):
-        robot = self.robots[robot_id]
-        motor_ids = robot.motor_ids
-
-        for id in motor_ids:
+    def stop_motors(self):
+        for id in self.motor_ids:
             curr_pos = self.motors.read_position(ID = id)
             self.motors.write_position(curr_pos, ID = id)
 
-    def write_zero_to_file(self, robot_id):
+    def write_zero_to_file(self):
         # TODO: Max
         pass
 
-    def read_zero_position_from_file(self, robot_id):
+    def read_zero_position_from_file(self):
         # TODO: Max
         return zero_position_in_units
     
-    def write_velocity(self, robot_id:str, velocity:float):
+    def write_velocity(self, velocity:float):
         velocity_zero_to_one = self.clip(velocity, 0.0, 1.0)
         velocity_in_units = self.denormalize(velocity_zero_to_one, MIN_VEL, MAX_VEL)
-        
-    def set_position(self, robot_id: str, length_in_meters: float, velocity:float):
-        length_in_meters = self.clip(length_in_meters, MIN_CABLE_LENGTH_IN_M, self.robots[robot_id].max_cable_length_in_m)
+        self.motors.write_profile_velocity(velocity_in_units, self.motor_ids)
+
+    def set_position(self, length_in_meters: float, velocity:float):
+        length_in_meters = self.clip(length_in_meters, MIN_CABLE_LENGTH_IN_M, self.max_cable_length_in_m)
         length_in_units = self.meters_to_units(length_in_meters)
         
-        zero_position_in_units = self.read_zero_position_from_file(robot_id=robot_id)
+        zero_position_in_units = self.read_zero_position_from_file()
         target_length_in_units = length_in_units + zero_position_in_units
         
-        self.motors.write_position(self.robots[robot_id].motor_ids, target_length_in_units)
+        self.write_velocity(velocity)
+        self.motors.write_position(self.motor_ids, target_length_in_units)
 
     def get_position(self, robot_id: str):
-        motor_ids = self.robots[robot_id].motor_ids        
-        positions_in_units = self.motors.read_position(motor_ids)
+        positions_in_units = []
+        for id in self.motor_ids:
+            positions_in_units.append(self.motors.read_position(id))
+            
         average_motor_positions = sum(positions_in_units)/len(positions_in_units)
         return self.units_to_meters(average_motor_positions)
 
@@ -158,34 +169,6 @@ class Robot:
 
     def units_to_meters(self, units):
         return units * CABLE_PER_MOTOR_TURN
-    
-    def normalize(self, lower, upper, value):
-        normalized = (value - lower)/(upper - lower)
-        normalized_clipped = self.clip(normalized, 0, 1)
 
     def denormalize(self, zero_to_one, lower, upper):
         return lower + zero_to_one * (upper - lower)
-
-robot_a = Robot(ROBOT_A_MOTOR_IDS, ROBOT_A_MAX_CABLE_LENGTH_IN_M, ROBOT_A_CURRENT_LIMITS_IN_UNITS)
-robot_b = Robot(ROBOT_B_MOTOR_IDS, ROBOT_B_MAX_CABLE_LENGTH_IN_M, ROBOT_B_CURRENT_LIMITS_IN_UNITS)
-robot_c = Robot(ROBOT_C_MOTOR_IDS, ROBOT_C_MAX_CABLE_LENGTH_IN_M, ROBOT_C_CURRENT_LIMITS_IN_UNITS)
-robot_d = Robot(ROBOT_D_MOTOR_IDS, ROBOT_D_MAX_CABLE_LENGTH_IN_M, ROBOT_D_CURRENT_LIMITS_IN_UNITS)
-
-class TrienaleRobots:
-    def __init__(self, robot_ids):
-        self.robots = {"A": robot_a, "B": robot_b, "C": robot_c, "D": robot_d}
-    
-        motors_ids = []
-        series_name = []
-        for robot_id in robot_ids:
-            motors_ids += self.robots[robot_id].motor_ids
-            series_name += ["xm", "xm"]
-
-        self.motors = Dynamixel(ID= motors_ids, descriptive_device_name="Trienale Robots", 
-                                series_name=series_name, baudrate=BAUDRATE, port_name=U2D2_PORT)
-
-        self.motors.begin_communication()
-        self.motors.set_operating_mode("current-based position", ID = "all")
-        
-        for robot_id in robot_ids:
-            self.apply_current_limit_settings(robot_id=robot_id)
