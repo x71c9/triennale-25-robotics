@@ -3,38 +3,32 @@
 import argparse
 import sys
 
+import trienale
 
-def run(letters):
-    """
-    Placeholder for the main logic.
-    letters: list of str containing any of 'A', 'B', 'C', 'D'
-    """
-    # TODO: implement the functionality for each letter
-    print(f"Running for letters: {letters}")
+
+def run(robot_id):
+    print(f"Running for robot_id: {robot_id}")
+    # robot = trienale.TrienaleRobot(robot_id)
+    # robot.homeing()
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Process a string of letters A, B, C, D.'
+        description='Process a single robot_id: A, B, C, or D.'
     )
     parser.add_argument(
-        'letters',
-        metavar='LETTERS',
+        'robot_id',
+        metavar='ROBOT_ID',
         type=str,
-        nargs='?',
-        help='String of letters to process (e.g., A, ABC, ACD). Defaults to ABCD if omitted.'
+        choices=['A', 'B', 'C', 'D'],
+        help='Robot ID letter to process (A, B, C, or D).'
     )
     args = parser.parse_args()
 
-    # Use default if none provided
-    letters_str = args.letters or 'ABCD'
-    # Validate input contains only A-D
-    if not set(letters_str).issubset({'A', 'B', 'C', 'D'}):
-        parser.error("LETTERS must only contain the characters A, B, C, and D")
+    # Use provided robot_id; require exactly one
+    robot_id = args.robot_id
 
-    # Convert to list and call run
-    letters = list(letters_str)
-    run(letters)
+    run(robot_id)
 
 
 if __name__ == '__main__':
