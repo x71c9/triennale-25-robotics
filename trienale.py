@@ -155,15 +155,27 @@ class TrienaleRobot:
 
     def write_zero_position_to_file(self):
         position_in_units = self.motors.read_position()
-        with open(self.file_path, 'w') as f:
-            f.write(str(position_in_units))
+        try:
+            with open(self.file_path, 'w') as f:
+                f.write(str(position_in_units))
+        except IOError as e:
+            raise RuntimeError(f"Failed to write zero position to {self.file_path}: {e}")
 
 
     def read_zero_position_from_file(self):
-        # TODO: Max
-        return zero_position_in_units
-    
+        try:
+            with open(self.file_path, 'r') as f:
+                content = f.read().strip()
+        except FileNotFoundError:
+            raise RuntimeError(f"Zero position file not found: {self.file_path}")
+        except IOError as e:
+            raise RuntimeError(f"Failed to read zero position from {self.file_path}: {e}")
 
+        try:
+            zero_position_in_units = float(content)
+        except ValueError:
+            raise ValueError(f"Invalid zero position value in {self.file_path}: '{content}'")
+        return zero_position_in_units
 
 
 
@@ -176,6 +188,8 @@ class TrienaleRobot:
         
         self.write_velocity(velocity)
         self.motors.write_position(self.motor_ids, target_length_in_units)
+
+
 
     def write_velocity(self, velocity:float):
         velocity_zero_to_one = self.clip(velocity, 0.0, 1.0)
