@@ -67,9 +67,8 @@ class TrienaleRobots:
         self.motors.set_operating_mode("current-based position", ID = "all")
         
         for robot_id in robot_ids:
+            self.apply_current_limit_settings(robot_id=robot_id)
             self.apply_homing_settings(robot_id=robot_id)
-        # for robot_id in self.robots.keys():
-        #     self.home_robot(robot_id)
 
     def homeing(self, robot_id):
         robot = self.robots[robot_id]
@@ -119,14 +118,17 @@ class TrienaleRobots:
         time.sleep(2)
         self.apply_homing_settings(robot_id=robot_id)
 
+
+    def apply_current_limit_settings(self, robot_id):
+        robot = self.robots[robot_id]
+        for lim, id in zip(robot.current_limits_in_units, robot.motor_ids):
+            self.motors.write_current(lim, ID = id)
+
     def apply_homing_settings(self, robot_id):
         robot = self.robots[robot_id]
         motor_ids = robot.motor_ids
+        self.motors.write_profile_velocity(HOMING_SPEED, ID=robot.motor_ids)
 
-        self.motors.write_profile_velocity(HOMING_SPEED, ID=motor_ids)
-
-        for lim, id in zip(robot.current_limits_in_units, motor_ids):
-            self.motors.write_current(lim, ID = id)
     
     def move_motors_simple(self, robot_id, reel_out):
         robot = self.robots[robot_id]
