@@ -72,6 +72,10 @@ class TrienaleRobot:
         self.apply_current_limit_settings()
 
 
+    def apply_current_limit_settings(self):
+        for lim, id in zip(self.current_limits, self.motor_ids):
+            self.motors.write_current(lim, ID = id)
+
 
 
     def homeing(self):
@@ -116,13 +120,9 @@ class TrienaleRobot:
         time.sleep(2)
         self.apply_homing_settings(robot_id=robot_id)
 
-    def apply_current_limit_settings(self):
-        for lim, id in zip(self.current_limits, self.motor_ids):
-            self.motors.write_current(lim, ID = id)
-
     def apply_homing_settings(self):
         self.motors.write_profile_velocity(HOMING_SPEED, ID=self.motor_ids)
-  
+
     def move_motors_simple(self, reel_out):
         if reel_out:
             demand = -900000
@@ -130,11 +130,17 @@ class TrienaleRobot:
             demand = 900000
 
         self.motors.write_position(demand, ID = self.motor_ids)
+
     
     def stop_motors(self):
         for id in self.motor_ids:
             curr_pos = self.motors.read_position(ID = id)
             self.motors.write_position(curr_pos, ID = id)
+
+
+
+
+
 
     def write_zero_to_file(self):
         # TODO: Max
@@ -144,10 +150,9 @@ class TrienaleRobot:
         # TODO: Max
         return zero_position_in_units
     
-    def write_velocity(self, velocity:float):
-        velocity_zero_to_one = self.clip(velocity, 0.0, 1.0)
-        velocity_in_units = self.denormalize(velocity_zero_to_one, MIN_VEL, MAX_VEL)
-        self.motors.write_profile_velocity(velocity_in_units, self.motor_ids)
+
+
+
 
     def set_position(self, length_in_meters: float, velocity:float):
         length_in_meters = self.clip(length_in_meters, MIN_CABLE_LENGTH_IN_M, self.max_cable_length_in_m)
@@ -159,13 +164,13 @@ class TrienaleRobot:
         self.write_velocity(velocity)
         self.motors.write_position(self.motor_ids, target_length_in_units)
 
-    def get_position(self, robot_id: str):
-        positions_in_units = []
-        for id in self.motor_ids:
-            positions_in_units.append(self.motors.read_position(id))
-            
-        average_motor_positions = sum(positions_in_units)/len(positions_in_units)
-        return self.units_to_meters(average_motor_positions)
+    def write_velocity(self, velocity:float):
+        velocity_zero_to_one = self.clip(velocity, 0.0, 1.0)
+        velocity_in_units = self.denormalize(velocity_zero_to_one, MIN_VEL, MAX_VEL)
+        self.motors.write_profile_velocity(velocity_in_units, self.motor_ids)
+
+    def denormalize(self, zero_to_one, lower, upper):
+        return lower + zero_to_one * (upper - lower)
 
     def clip(self, value, lower, upper):
         return lower if value < lower else upper if value > upper else value
@@ -173,8 +178,16 @@ class TrienaleRobot:
     def meters_to_units(self, meters):
         return int(round(meters / CABLE_PER_MOTOR_TURN))
 
+
+
+
+    def get_position(self):
+        positions_in_units = []
+        for id in self.motor_ids:
+            positions_in_units.append(self.motors.read_position(id))
+            
+        average_motor_positions = sum(positions_in_units)/len(positions_in_units)
+        return self.units_to_meters(average_motor_positions)
+
     def units_to_meters(self, units):
         return units * CABLE_PER_MOTOR_TURN
-
-    def denormalize(self, zero_to_one, lower, upper):
-        return lower + zero_to_one * (upper - lower)
