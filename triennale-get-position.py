@@ -9,12 +9,15 @@ import triennale
 def run(robot_id):
     print(f"Running for robot_id: {robot_id}")
     robot = triennale.TriennaleRobot(robot_id)
-    robot.get_position()
+    length = robot.get_position()
+
+    print(f"Robot cable length in m:")
+    print(length)
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Process a single robot_id: A, B, C, or D.'
+        description='Process a single robot_id: A, B, C, or D and output its cable length.'
     )
     parser.add_argument(
         'robot_id',
@@ -25,9 +28,7 @@ def main():
     )
     args = parser.parse_args()
 
-    robot_id = args.robot_id
-
-    run(robot_id)
+    run(args.robot_id)
 
 
 if __name__ == '__main__':
