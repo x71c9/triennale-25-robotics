@@ -25,18 +25,22 @@ CABLE_PER_MOTOR_TURN = CABLE_PER_DRUM_TURN / GEAR_RATIO
 ROBOT_A_MOTOR_IDS = [10,3]
 ROBOT_A_MAX_CABLE_LENGTH_IN_M = 1.0
 ROBOT_A_CURRENT_LIMITS_IN_UNITS = [250, 250]
+ROBOT_A_FILE_PATH = "~/robotA.txt"
 
 ROBOT_B_MOTOR_IDS = [13,2]
 ROBOT_B_MAX_CABLE_LENGTH_IN_M = 1.0
 ROBOT_B_CURRENT_LIMITS_IN_UNITS = [200, 200]
+ROBOT_B_FILE_PATH = "~/robotB.txt"
 
 ROBOT_C_MOTOR_IDS = [11,1]
 ROBOT_C_MAX_CABLE_LENGTH_IN_M = 1.0
 ROBOT_C_CURRENT_LIMITS_IN_UNITS = [180, 180]
+ROBOT_C_FILE_PATH = "~/robotC.txt"
 
 ROBOT_D_MOTOR_IDS = [12,0]
 ROBOT_D_MAX_CABLE_LENGTH_IN_M = 1.0
 ROBOT_D_CURRENT_LIMITS_IN_UNITS = [150, 150]
+ROBOT_D_FILE_PATH = "~/robotD.txt"
 
 
 ROBOT_IDS = { "A": ROBOT_A_MOTOR_IDS, 
@@ -54,6 +58,11 @@ ROBOT_CURRENT_LIMITS = {  "A": ROBOT_A_CURRENT_LIMITS_IN_UNITS,
                         "C": ROBOT_C_CURRENT_LIMITS_IN_UNITS, 
                         "D": ROBOT_D_CURRENT_LIMITS_IN_UNITS}
 
+ROBOT_FILE_PATHS = { "A": ROBOT_A_FILE_PATH, 
+            "B": ROBOT_B_FILE_PATH, 
+            "C": ROBOT_C_FILE_PATH, 
+            "D": ROBOT_D_FILE_PATH}
+
 
 
 class TrienaleRobot:
@@ -62,6 +71,7 @@ class TrienaleRobot:
         self.motor_ids = ROBOT_IDS[robot_id]
         self.max_cable_length_in_m = ROBOT_MAX_CABLE_LENGTHS_IN_M[robot_id]
         self.current_limits = ROBOT_CURRENT_LIMITS[robot_id]
+        self.file_path = ROBOT_FILE_PATHS[robot_id]
         
         self.motors = Dynamixel(ID= self.motor_ids, descriptive_device_name="TrienaleRobot", 
                                 series_name=["xm", "xm"], baudrate=BAUDRATE, port_name=U2D2_PORT)
@@ -97,6 +107,9 @@ class TrienaleRobot:
                     self.stop_motors()
                     print("\n LIMIT reached")
                     self.reel_out_a_bit()
+                    
+                    self.write_zero_position_to_file()
+
                     return
                     
             print(curr)
@@ -140,11 +153,11 @@ class TrienaleRobot:
 
 
 
+    def write_zero_position_to_file(self):
+        position_in_units = self.motors.read_position()
+        with open(self.file_path, 'w') as f:
+            f.write(str(position_in_units))
 
-
-    def write_zero_to_file(self):
-        # TODO: Max
-        pass
 
     def read_zero_position_from_file(self):
         # TODO: Max
