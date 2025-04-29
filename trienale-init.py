@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import sys
 
 
 def run(letters):
@@ -12,25 +13,27 @@ def run(letters):
     print(f"Running for letters: {letters}")
 
 
-
-
 def main():
     parser = argparse.ArgumentParser(
-        description='Process letters A, B, C, D.'
+        description='Process a string of letters A, B, C, D.'
     )
     parser.add_argument(
         'letters',
-        metavar='LETTER',
+        metavar='LETTERS',
         type=str,
-        nargs='*',
-        choices=['A', 'B', 'C', 'D'],
-        help='Letters to process (A, B, C, D). If none specified, all are used.'
+        nargs='?',
+        help='String of letters to process (e.g., A, ABC, ACD). Defaults to ABCD if omitted.'
     )
     args = parser.parse_args()
 
-    # If no arguments passed, default to all letters
-    letters = args.letters if args.letters else ['A', 'B', 'C', 'D']
+    # Use default if none provided
+    letters_str = args.letters or 'ABCD'
+    # Validate input contains only A-D
+    if not set(letters_str).issubset({'A', 'B', 'C', 'D'}):
+        parser.error("LETTERS must only contain the characters A, B, C, and D")
 
+    # Convert to list and call run
+    letters = list(letters_str)
     run(letters)
 
 
