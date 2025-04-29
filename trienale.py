@@ -126,10 +126,8 @@ class TrienaleRobots:
 
     def apply_homing_settings(self, robot_id):
         robot = self.robots[robot_id]
-        motor_ids = robot.motor_ids
         self.motors.write_profile_velocity(HOMING_SPEED, ID=robot.motor_ids)
-
-    
+  
     def move_motors_simple(self, robot_id, reel_out):
         robot = self.robots[robot_id]
         motor_ids = robot.motor_ids
@@ -141,7 +139,6 @@ class TrienaleRobots:
 
         self.motors.write_position(demand, ID = motor_ids)
     
-
     def stop_motors(self, robot_id):
         robot = self.robots[robot_id]
         motor_ids = robot.motor_ids
@@ -151,36 +148,31 @@ class TrienaleRobots:
             self.motors.write_position(curr_pos, ID = id)
 
 
-    # def clip(self, value, lower, upper):
-    #     return lower if value < lower else upper if value > upper else value
+    def write_zero_to_file(self, robot_id):
+        # TODO: Max
+        pass
 
-    # def meters_to_units(self, meters):
-    #     return int(round(meters / CABLE_PER_MOTOR_TURN))
+    def read_zero_position_from_file(self, robot_id):
+        # TODO: Max
+        return zero_position_in_units
+    
+    def set_position(self, robot_id: str, length_in_meters: float):
+        length_in_meters = self.clip(length_in_meters, MIN_CABLE_LENGTH_IN_M, self.robots[robot_id].max_cable_length_in_m)
+        length_in_units = self.meters_to_units(length_in_meters)
+        motor_ids = self.robots[robot_id].motor_ids
+        self.motors.write_position(motor_ids, length_in_units)
 
-    # def units_to_meters(self, units):
-    #     return units * CABLE_PER_MOTOR_TURN
+    def get_position(self, robot_id: str):
+        motor_ids = self.robots[robot_id].motor_ids        
+        positions_in_units = self.motors.read_position(motor_ids)
+        average_motor_positions = sum(positions_in_units)/len(positions_in_units)
+        return self.units_to_meters(average_motor_positions)
 
-    # def home_robot(self, robot_id):
-    #     robot = self.robots[robot_id]
-    #     motor_ids = robot.motor_ids
-    #     current_limits_in_units = robot.current_limits_in_units
-        
-    #     self.motors.write_position(motor_ids, -sys.maxsize)
+    def clip(self, value, lower, upper):
+        return lower if value < lower else upper if value > upper else value
 
-    #     currents_in_amp = self.motors.read_current(motor_ids)
-    #     while (currents_in_amp[0] + SMALL_CURRENT_THRESHOLD_IN_UNITS < current_limits_in_units[0] or 
-    #            currents_in_amp[1] + SMALL_CURRENT_THRESHOLD_IN_UNITS < current_limits_in_units[1]):
-    #         time.sleep(1) 
-    #         currents_in_amp = self.motors.read_current(motor_ids)
+    def meters_to_units(self, meters):
+        return int(round(meters / CABLE_PER_MOTOR_TURN))
 
-    # def set_position(self, robot_id: str, length_in_meters: float):
-    #     length_in_meters = self.clip(length_in_meters, MIN_CABLE_LENGTH_IN_M, self.robots[robot_id].max_cable_length_in_m)
-    #     length_in_units = self.meters_to_units(length_in_meters)
-    #     motor_ids = self.robots[robot_id].motor_ids
-    #     self.motors.write_position(motor_ids, length_in_units)
-
-    # def get_position(self, robot_id: str):
-        # motor_ids = self.robots[robot_id].motor_ids        
-        # positions_in_units = self.motors.read_position(motor_ids)
-        # average_motor_positions = sum(positions_in_units)/len(positions_in_units)
-        # return self.units_to_meters(average_motor_positions)
+    def units_to_meters(self, units):
+        return units * CABLE_PER_MOTOR_TURN
