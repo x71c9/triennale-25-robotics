@@ -8,8 +8,8 @@ import triennale
 
 def run(robot_id):
     print(f"Running for robot_id: {robot_id}")
-    # robot = triennale.TriennaleRobot(robot_id)
-    # robot.get_position()
+    robot = triennale.TriennaleRobot(robot_id)
+    robot.get_position()
 
 
 def main():
