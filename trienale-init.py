@@ -25,7 +25,6 @@ def main():
     )
     args = parser.parse_args()
 
-    # Use provided robot_id; require exactly one
     robot_id = args.robot_id
 
     run(robot_id)
