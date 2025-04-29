@@ -18,6 +18,7 @@ GEAR_RATIO = 234.0/30.0         # Big gear/small gear
 DRUM_DIAMETER_M = 0.35          # Diameter with half cable wound up
 CABLE_PER_DRUM_TURN = math.pi * DRUM_DIAMETER_M
 CABLE_PER_MOTOR_TURN = CABLE_PER_DRUM_TURN / GEAR_RATIO
+REVERSE_LENGTH = -1.0
 
 
 
@@ -201,7 +202,7 @@ class TriennaleRobot:
         self.write_velocity(velocity)
 
         length_in_meters = self.clip(length_in_meters, MIN_CABLE_LENGTH_IN_M, self.max_cable_length_in_m)
-        length_in_units = self.meters_to_units(length_in_meters)
+        length_in_units = REVERSE_LENGTH * self.meters_to_units(length_in_meters)
 
         if self.dbg:
             print(f"Additional length in units: {length_in_units}")
@@ -209,7 +210,7 @@ class TriennaleRobot:
         target_positions = [zp + length_in_units for zp in self.zero_positions_in_units]
 
         for id, position in zip(self.motor_ids, target_positions):
-            
+
             self.motors.write_position(position, ID=id)
             if self.dbg:
                 print(f"Setting motor {id} to length: {position}")
