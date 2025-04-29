@@ -81,6 +81,8 @@ class TrienaleRobot:
         
         self.apply_current_limit_settings()
 
+        self.zero_position_in_units = self.read_zero_position_from_file()
+
 
     def apply_current_limit_settings(self):
         for lim, id in zip(self.current_limits, self.motor_ids):
@@ -182,14 +184,11 @@ class TrienaleRobot:
     def set_position(self, length_in_meters: float, velocity:float):
         length_in_meters = self.clip(length_in_meters, MIN_CABLE_LENGTH_IN_M, self.max_cable_length_in_m)
         length_in_units = self.meters_to_units(length_in_meters)
-        
-        zero_position_in_units = self.read_zero_position_from_file()
-        target_length_in_units = length_in_units + zero_position_in_units
+
+        target_length_in_units = length_in_units + self.zero_position_in_units
         
         self.write_velocity(velocity)
         self.motors.write_position(self.motor_ids, target_length_in_units)
-
-
 
     def write_velocity(self, velocity:float):
         velocity_zero_to_one = self.clip(velocity, 0.0, 1.0)
@@ -214,7 +213,9 @@ class TrienaleRobot:
             positions_in_units.append(self.motors.read_position(id))
             
         average_motor_positions = sum(positions_in_units)/len(positions_in_units)
-        return self.units_to_meters(average_motor_positions)
+        motor_position_in_units = average_motor_positions - self.zero_position_in_units
+
+        return self.units_to_meters(motor_position_in_units)
 
     def units_to_meters(self, units):
         return units * CABLE_PER_MOTOR_TURN
