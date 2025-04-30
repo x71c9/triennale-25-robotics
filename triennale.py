@@ -75,7 +75,7 @@ ROBOT_FILE_PATHS = {    "A": ROBOT_A_FILE_PATH,
 
 
 class TriennaleRobot:
-    def __init__(self, robot_id):
+    def __init__(self, robot_id, mode="read_write"):
         self.dbg = True
 
         self.motor_ids = ROBOT_IDS[robot_id]
@@ -88,9 +88,10 @@ class TriennaleRobot:
                                 series_name=["xm", "xm"], baudrate=BAUDRATE, port_name=U2D2_PORT)
 
         self.motors.begin_communication()
-        self.motors.set_operating_mode("current-based position", ID = "all")
-        
-        self.apply_current_limit_settings()
+
+        if mode is not "read_only":
+            self.motors.set_operating_mode("current-based position", ID = "all")
+            self.apply_current_limit_settings()
 
         self.zero_positions_in_units = self.read_zero_positions_from_file()
         if self.dbg:

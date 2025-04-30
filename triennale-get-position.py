@@ -6,7 +6,7 @@ import triennale
 
 def run(robot_id):
     print(f"Running for robot_id: {robot_id}")
-    robot = triennale.TriennaleRobot(robot_id)
+    robot = triennale.TriennaleRobot(robot_id, mode="read_only")
     length = robot.get_position()
 
     print(f"Robot cable length in m:")
