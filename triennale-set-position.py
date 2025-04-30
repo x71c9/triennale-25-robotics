@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-import sys
-
 import triennale
 
 def run(robot_id, position, velocity):
