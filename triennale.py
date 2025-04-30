@@ -23,51 +23,55 @@ REVERSE_LENGTH = -1.0
 
 
 # INDIVIDUAL SETTINGS
-ROBOT_A_MOTOR_IDS = [10,3]
-ROBOT_A_MAX_CABLE_LENGTH_IN_M = 2.0
-# ROBOT_A_CURRENT_LIMITS_IN_UNITS = [250, 250]
-ROBOT_A_CURRENT_LIMITS_IN_UNITS = [100, 100]
-ROBOT_A_FILE_PATH = "/home/max/robotA.txt"
+ROBOT_A_MOTOR_IDS = [10,3] # <-- DON'T TOUCH THIS
+ROBOT_A_MAX_CABLE_LENGTH_IN_M = 5.4 # <-- DON'T TOUCH THIS
+ROBOT_A_HOMING_CURRENT_LIMITS_IN_UNITS = [230, 230] # <-- EDIT THIS
+ROBOT_A_CURRENT_LIMITS_IN_UNITS = [220, 200] # <-- EDIT THIS
+ROBOT_A_FILE_PATH = "/home/max/robotA.txt" # <-- EDIT THIS
 
-ROBOT_B_MOTOR_IDS = [13,2]
-ROBOT_B_MAX_CABLE_LENGTH_IN_M = 2.0
-# ROBOT_B_CURRENT_LIMITS_IN_UNITS = [200, 200]
-ROBOT_B_CURRENT_LIMITS_IN_UNITS = [100, 100]
-ROBOT_B_FILE_PATH = "/home/max/robotB.txt"
+ROBOT_B_MOTOR_IDS = [13,2] # <-- DON'T TOUCH THIS
+ROBOT_B_MAX_CABLE_LENGTH_IN_M = 4.5 # <-- DON'T TOUCH THIS
+ROBOT_B_HOMING_CURRENT_LIMITS_IN_UNITS = [270, 270] # <-- EDIT THIS
+ROBOT_B_CURRENT_LIMITS_IN_UNITS = [200, 200] # <-- EDIT THIS
+ROBOT_B_FILE_PATH = "/home/max/robotB.txt" # <-- EDIT THIS
 
-ROBOT_C_MOTOR_IDS = [11,1]
-ROBOT_C_MAX_CABLE_LENGTH_IN_M = 5.0
-# ROBOT_C_CURRENT_LIMITS_IN_UNITS = [180, 180]
-ROBOT_C_CURRENT_LIMITS_IN_UNITS = [200, 200]
-ROBOT_C_FILE_PATH = "/home/max/robotC.txt"
+ROBOT_C_MOTOR_IDS = [11,1] # <-- DON'T TOUCH THIS
+ROBOT_C_MAX_CABLE_LENGTH_IN_M = 4.8
+ROBOT_C_HOMING_CURRENT_LIMITS_IN_UNITS = [200, 200] # <-- EDIT THIS
+ROBOT_C_CURRENT_LIMITS_IN_UNITS = [120, 100] # <-- EDIT THIS
+ROBOT_C_FILE_PATH = "/home/max/robotC.txt" # <-- EDIT THIS
 
-ROBOT_D_MOTOR_IDS = [12,0]
+ROBOT_D_MOTOR_IDS = [12,0] # <-- DON'T TOUCH THIS
 ROBOT_D_MAX_CABLE_LENGTH_IN_M = 5.0
-# ROBOT_D_CURRENT_LIMITS_IN_UNITS = [150, 150]
-ROBOT_D_CURRENT_LIMITS_IN_UNITS = [170, 170]
-ROBOT_D_FILE_PATH = "/home/max/robotD.txt"
+ROBOT_D_CURRENT_LIMITS_IN_UNITS = [170, 170] # <-- EDIT THIS
+ROBOT_D_HOMING_CURRENT_LIMITS_IN_UNITS = [120, 100] # <-- EDIT THIS
+ROBOT_D_FILE_PATH = "/home/max/robotD.txt" # <-- EDIT THIS
 
 
-ROBOT_IDS = { "A": ROBOT_A_MOTOR_IDS, 
-            "B": ROBOT_B_MOTOR_IDS, 
-            "C": ROBOT_C_MOTOR_IDS, 
-            "D": ROBOT_D_MOTOR_IDS}
+ROBOT_IDS = {   "A": ROBOT_A_MOTOR_IDS, 
+                "B": ROBOT_B_MOTOR_IDS, 
+                "C": ROBOT_C_MOTOR_IDS, 
+                "D": ROBOT_D_MOTOR_IDS}
 
-ROBOT_MAX_CABLE_LENGTHS_IN_M = {  "A": ROBOT_A_MAX_CABLE_LENGTH_IN_M, 
-                                "B": ROBOT_B_MAX_CABLE_LENGTH_IN_M, 
-                                "C": ROBOT_C_MAX_CABLE_LENGTH_IN_M, 
-                                "D": ROBOT_D_MAX_CABLE_LENGTH_IN_M}
+ROBOT_MAX_CABLE_LENGTHS_IN_M = {    "A": ROBOT_A_MAX_CABLE_LENGTH_IN_M, 
+                                    "B": ROBOT_B_MAX_CABLE_LENGTH_IN_M, 
+                                    "C": ROBOT_C_MAX_CABLE_LENGTH_IN_M, 
+                                    "D": ROBOT_D_MAX_CABLE_LENGTH_IN_M}
 
-ROBOT_CURRENT_LIMITS = {  "A": ROBOT_A_CURRENT_LIMITS_IN_UNITS, 
-                        "B": ROBOT_B_CURRENT_LIMITS_IN_UNITS, 
-                        "C": ROBOT_C_CURRENT_LIMITS_IN_UNITS, 
-                        "D": ROBOT_D_CURRENT_LIMITS_IN_UNITS}
+ROBOT_HOMING_CURRENT_LIMITS = {     "A": ROBOT_A_HOMING_CURRENT_LIMITS_IN_UNITS, 
+                                    "B": ROBOT_B_HOMING_CURRENT_LIMITS_IN_UNITS, 
+                                    "C": ROBOT_C_HOMING_CURRENT_LIMITS_IN_UNITS, 
+                                    "D": ROBOT_D_HOMING_CURRENT_LIMITS_IN_UNITS}
 
-ROBOT_FILE_PATHS = { "A": ROBOT_A_FILE_PATH, 
-            "B": ROBOT_B_FILE_PATH, 
-            "C": ROBOT_C_FILE_PATH, 
-            "D": ROBOT_D_FILE_PATH}
+ROBOT_CURRENT_LIMITS = {    "A": ROBOT_A_CURRENT_LIMITS_IN_UNITS, 
+                            "B": ROBOT_B_CURRENT_LIMITS_IN_UNITS, 
+                            "C": ROBOT_C_CURRENT_LIMITS_IN_UNITS, 
+                            "D": ROBOT_D_CURRENT_LIMITS_IN_UNITS}
 
+ROBOT_FILE_PATHS = {    "A": ROBOT_A_FILE_PATH, 
+                        "B": ROBOT_B_FILE_PATH, 
+                        "C": ROBOT_C_FILE_PATH, 
+                        "D": ROBOT_D_FILE_PATH}
 
 
 class TriennaleRobot:
@@ -77,6 +81,7 @@ class TriennaleRobot:
         self.motor_ids = ROBOT_IDS[robot_id]
         self.max_cable_length_in_m = ROBOT_MAX_CABLE_LENGTHS_IN_M[robot_id]
         self.current_limits = ROBOT_CURRENT_LIMITS[robot_id]
+        self.homing_current_limits = ROBOT_HOMING_CURRENT_LIMITS[robot_id]
         self.file_path = ROBOT_FILE_PATHS[robot_id]
         
         self.motors = Dynamixel(ID= self.motor_ids, descriptive_device_name="TriennaleRobot", 
@@ -98,8 +103,9 @@ class TriennaleRobot:
 
 
 
-    def homeing(self):
+    def homing(self):
         self.apply_homing_settings()
+        time.sleep(0.5)
         self.move_motors_simple(reel_out=False)
 
         while 1:
@@ -108,7 +114,7 @@ class TriennaleRobot:
                 current = self.motors.read_current(ID=id)
                 curr.append(current)
                 
-                limits = self.current_limits
+                limits = self.homing_current_limits
                 if current > max(limits):
                     self.toggle_torque(torque_on=False)
                     time.sleep(0.5)
@@ -123,7 +129,7 @@ class TriennaleRobot:
                     return
                     
             print(curr)
-
+    
     def toggle_torque(self, torque_on):
         if torque_on:
             self.motors.enable_torque(ID=self.motor_ids)
@@ -138,11 +144,17 @@ class TriennaleRobot:
             target_position = current_position - 3000
             self.motors.write_position(target_position, ID=id)
 
-        time.sleep(7)
+        time.sleep(10)
         self.apply_homing_settings()
+        self.apply_current_limit_settings()
 
     def apply_homing_settings(self):
         self.motors.write_profile_velocity(HOMING_SPEED, ID=self.motor_ids)
+
+        for lim, id in zip(self.homing_current_limits, self.motor_ids):
+            print("Setting limits to", lim)
+            self.motors.write_current(lim, ID = id)
+
 
     def move_motors_simple(self, reel_out):
         if reel_out:
