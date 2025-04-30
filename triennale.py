@@ -7,7 +7,7 @@ BAUDRATE = 1000000
 
 # COMMON SETTINGS
 HOMING_SPEED = 50
-REEL_OUT_A_BIT_SPEED = 20
+REEL_OUT_A_BIT_SPEED = 30
 MAX_VEL = 100
 MIN_VEL = 20
 
@@ -24,23 +24,27 @@ REVERSE_LENGTH = -1.0
 
 # INDIVIDUAL SETTINGS
 ROBOT_A_MOTOR_IDS = [10,3]
-ROBOT_A_MAX_CABLE_LENGTH_IN_M = 1.0
-ROBOT_A_CURRENT_LIMITS_IN_UNITS = [250, 250]
+ROBOT_A_MAX_CABLE_LENGTH_IN_M = 2.0
+# ROBOT_A_CURRENT_LIMITS_IN_UNITS = [250, 250]
+ROBOT_A_CURRENT_LIMITS_IN_UNITS = [100, 100]
 ROBOT_A_FILE_PATH = "/home/max/robotA.txt"
 
 ROBOT_B_MOTOR_IDS = [13,2]
-ROBOT_B_MAX_CABLE_LENGTH_IN_M = 5.0
-ROBOT_B_CURRENT_LIMITS_IN_UNITS = [200, 200]
+ROBOT_B_MAX_CABLE_LENGTH_IN_M = 2.0
+# ROBOT_B_CURRENT_LIMITS_IN_UNITS = [200, 200]
+ROBOT_B_CURRENT_LIMITS_IN_UNITS = [100, 100]
 ROBOT_B_FILE_PATH = "/home/max/robotB.txt"
 
 ROBOT_C_MOTOR_IDS = [11,1]
-ROBOT_C_MAX_CABLE_LENGTH_IN_M = 1.0
-ROBOT_C_CURRENT_LIMITS_IN_UNITS = [180, 180]
+ROBOT_C_MAX_CABLE_LENGTH_IN_M = 5.0
+# ROBOT_C_CURRENT_LIMITS_IN_UNITS = [180, 180]
+ROBOT_C_CURRENT_LIMITS_IN_UNITS = [200, 200]
 ROBOT_C_FILE_PATH = "/home/max/robotC.txt"
 
 ROBOT_D_MOTOR_IDS = [12,0]
-ROBOT_D_MAX_CABLE_LENGTH_IN_M = 1.0
-ROBOT_D_CURRENT_LIMITS_IN_UNITS = [150, 150]
+ROBOT_D_MAX_CABLE_LENGTH_IN_M = 5.0
+# ROBOT_D_CURRENT_LIMITS_IN_UNITS = [150, 150]
+ROBOT_D_CURRENT_LIMITS_IN_UNITS = [170, 170]
 ROBOT_D_FILE_PATH = "/home/max/robotD.txt"
 
 
@@ -131,10 +135,10 @@ class TriennaleRobot:
 
         for id in self.motor_ids:
             current_position = self.motors.read_position(ID = id)
-            target_position = current_position - 1000
+            target_position = current_position - 3000
             self.motors.write_position(target_position, ID=id)
 
-        time.sleep(3)
+        time.sleep(7)
         self.apply_homing_settings()
 
     def apply_homing_settings(self):
